@@ -1,0 +1,67 @@
+version: '3'
+
+services:
+  mosquitto:
+    build: ./eclipse-mosquitto
+    container_name: ${MQTT_HOST:-mosquitto}
+    ports:
+      - "${MQTT_PORT:-8883}:${MQTT_PORT:-8883}"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - mqtt_data:/mosquitto/data:rw
+      - mqtt_log:/mosquitto/log:rw
+      - /etc/nginx/certs/mosquitto.alejandroherr.me:/mosquitto/certs:ro
+    networks:
+      - mqtt_net
+      - mqtt_intranet
+    environment:
+      VIRTUAL_HOST: mosquitto.alejandroherr.me
+      VIRTUAL_PORT: "7777"
+      LETSENCRYPT_HOST: mosquitto.alejandroherr.me
+      LETSENCRYPT_EMAIL: ahernandezc@protonmail.com
+      DEBUG: ${DEBUG}
+  mongo:
+    image: mongo:latest
+    container_name: ${MONGO_HOST:-mongo}
+    restart: always
+    ports:
+      - "${MONGO_PORT:-27017}:${MONGO_PORT:-27017}"
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGO_DB}
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - mqtt_intranet
+  mosquitto-mongodb:
+    build: ./mosquitto-mongodb
+    container_name: ${CLIENT_NAME:-mosquitto-mongodb}
+    volumes:
+      - mqtt_log:/mosquitto-mongodb/log
+    environment:
+      DEBUG: ${DEBUG}
+    depends_on:
+      - ${MQTT_HOST:-mosquitto}
+      - ${MONGO_HOST:-mongo}
+    links:
+      - mosquitto
+      - ${MONGO_HOST:-mongo}
+    networks:
+      - mqtt_intranet
+    environment:
+      NAME: ${CLIENT_NAME:-mosquitto-mongodb}
+      DEBUG: ${DEBUG}
+      MONGO_HOST: ${MONGO_HOST:-mongo}
+      MONGO_PORT: ${MONGO_PORT:-27017}
+      MONGO_DB: ${MONGO_DB}
+      MQTT_HOST: ${MQTT_HOST:-mosquitto}
+      MQTT_PORT: ${MQTT_PORT:-8883}
+      MQTT_PROTOCOL: ${MQTT_PROTOCOL:-mqtts}
+networks:
+  mqtt_net:
+  mqtt_intranet:
+    internal: true
+volumes:
+  mqtt_data:
+  mqtt_log:
+  mongo_data:
