@@ -1,0 +1,5 @@
+{
+    "eslint.enable": true,
+    "eslint.packageManager": "yarn",
+    "eslint.nodePath": "../mosquito-mongodb/node_modules",
+}

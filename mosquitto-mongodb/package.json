@@ -1,0 +1,24 @@
+{
+  "name": "mosquitto-mongodb",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "bunyan": "^1.8.12",
+    "bunyan-stdout-stream": "^1.0.5",
+    "camo": "^0.12.3",
+    "cli-color": "^1.2.0",
+    "mqtt": "^2.18.1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-plugin-import": "^2.12.0"
+  },
+  "scripts": {
+    "build": "yarn clean && babel src --out-dir ./build",
+    "clean": "rm -rfv ./build/*",
+    "start": "node ./build/index.js"
+  }
+}
